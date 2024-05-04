@@ -102,7 +102,7 @@ function Table(props) {
   console.log('rendering table.js ...');
   return (
     <div className="numbers">
-      <div className="sub1">Statics Table</div>
+      <div className="sub1">Statistics</div>
       { renderTable('numbers') }
       { renderTable('ball_numbers') }
     </div>
