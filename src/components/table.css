@@ -1,0 +1,45 @@
+.numbers table {
+  border: 1px solid;
+  width: calc(50% - 10px);
+  border-collapse: collapse;
+  margin-right: 20px;
+  float: left;
+}
+
+.numbers table:last-child {
+  margin-right: 0px;
+}
+.numbers th {
+  color: #fff;
+  background-color: #000;
+  text-transform: uppercase;
+  width: 50%;
+}
+
+.numbers th:first-child {
+  border-right: 1px solid #fff;
+}
+
+.numbers th span:first-child{
+  position: relative;
+  top:2px;
+}
+
+.numbers td {
+  border-bottom: 1px dashed;
+  border-right: 1px dashed;
+  text-align: right;
+  padding-right: 10px;
+}
+
+.numbers td:last-child {
+  border-right: 0;
+}
+
+.numbers .up-down-arrow {
+  float: right;
+  margin-right:10px;
+  cursor: pointer;
+  position: relative;
+  bottom: 1px;
+}
