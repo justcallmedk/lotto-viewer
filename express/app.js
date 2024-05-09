@@ -21,8 +21,9 @@ const SQL_GET_NUMBERS = 'SELECT number, CAST(is_ball as INT) as is_ball, COUNT(n
 const SQL_DRAW_DATE_FROM = ' AND draw_date >= ?';
 const SQL_DRAW_DATE_TO = ' AND draw_date <= ?';
 const SQL_ORDER_GROUP_BY_NUMBER = ' GROUP BY number, is_ball ORDER BY count';
+const SQL_GET_MIN_MAX_DATE = 'SELECT MIN(draw_date) AS min, MAX(draw_date) AS max FROM numbers WHERE type_id = ?';
 
-//TODO move to command line
+//helpers
 const connectDB = () => {
   const connection = mysql.createConnection({
     host     : process.argv[2],
@@ -32,13 +33,35 @@ const connectDB = () => {
   });
   connection.connect();
   return connection;
-}
+};
 
+const execute = async(cached,sql,params) => {
+  const connection = connectDB();
+  const query = util.promisify(connection.query).bind(connection);
+  const data = await query(sql,params);
+  if(cached === false) { //different from undefined (don't cache flag)
+    myCache.updateCache(sql,params,data);
+  }
+  return data;
+};
+//end of helpers
 const getLastDrawDate = async (type) => {
   const connection = connectDB();
   const query = util.promisify(connection.query).bind(connection);
   const rows = await query(SQL_GET_LAST_DRAW_DATE,type);
   return rows[0].draw_date.toISOString().split('T')[0];
+};
+
+const getMixMaxDate = async (type) => {
+  const sql = SQL_GET_MIN_MAX_DATE;
+  const params = [type];
+  let cached = undefined;
+  cached = myCache.getCache(sql,params);
+  if(cached) {
+    return cached;
+  }
+
+  return await execute(cached,sql,params);
 };
 
 const getNumbers = async (type,fromDate,toDate) => {
@@ -62,13 +85,7 @@ const getNumbers = async (type,fromDate,toDate) => {
     return cached;
   }
 
-  const connection = connectDB();
-  const query = util.promisify(connection.query).bind(connection);
-  const data = await query(sql,params);
-  if(cached === false) { //different from undefined (don't cache flag)
-    myCache.updateCache(sql,params,data);
-  }
-  return data;
+  return await execute(cached,sql,params);
 };
 
 const corsOptions = { //localhost developement only
@@ -90,6 +107,15 @@ app.get('/numbers', async (req, res) => {
     return;
   }
   const ret = await getNumbers(req.query.typeId,req.query.fromDate,req.query.toDate);
+  res.json(ret);
+});
+
+app.get('/min_max_date', async (req, res) => {
+  if(!req.query.typeId) {
+    res.status(400).send('Provide type ID!');
+    return;
+  }
+  const ret = await getMixMaxDate(req.query.typeId);
   res.json(ret);
 });
 

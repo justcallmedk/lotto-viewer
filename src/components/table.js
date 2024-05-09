@@ -99,7 +99,6 @@ function Table(props) {
     setSortOrder(sortOrder_);
   };
 
-  console.log('rendering table.js ...');
   return (
     <div className="numbers">
       <div className="sub1">Statistics</div>

@@ -1,9 +1,11 @@
 .App {
   margin:20px;
 }
+
 a {
   color: inherit;
 }
+
 .header {
   margin:20px 0;
   font-weight: 700;
@@ -17,9 +19,13 @@ a {
   font-weight:700;
   text-transform: uppercase;
 }
+
+
+
 .selector a.mm {
   float:right;
 }
+
 .selector a.active {
   background-color:yellow;
 }
