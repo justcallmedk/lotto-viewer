@@ -16,6 +16,10 @@ const myCache = new Cache();
 const PB_TYPE = 1;
 const MM_TYPE = 2;
 
+const LAST_RULE_UPDATE_DATE = {
+  1 : '2015-10-04',
+  2 : '2017-10-28'
+};
 const SQL_GET_LAST_DRAW_DATE = 'SELECT draw_date FROM numbers WHERE type_id = ? ORDER BY draw_date DESC LIMIT 1';
 const SQL_GET_NUMBERS = 'SELECT number, CAST(is_ball as INT) as is_ball, COUNT(number) as count FROM numbers WHERE type_id = ?';
 const SQL_DRAW_DATE_FROM = ' AND draw_date >= ?';
@@ -64,21 +68,17 @@ const getMixMaxDate = async (type) => {
   return await execute(cached,sql,params);
 };
 
-const getNumbers = async (type,fromDate,toDate) => {
-  let sql = SQL_GET_NUMBERS;
-  let params = [type];
-  if(fromDate) {
-    sql += SQL_DRAW_DATE_FROM;
-    params.push(fromDate);
-  }
-  if(toDate) {
-    sql += SQL_DRAW_DATE_TO;
+const getNumbers = async (type,fromDate,toDate,isDefault) => {
+  let sql = SQL_GET_NUMBERS + SQL_DRAW_DATE_FROM;
+  let params = [type,fromDate];
+
+  if(!isDefault) {
     params.push(toDate);
+    sql += SQL_DRAW_DATE_TO;
   }
   sql += SQL_ORDER_GROUP_BY_NUMBER;
-
   let cached = undefined;
-  if(!fromDate && !toDate) { //don't cache if date ranged, too many potential keys
+  if(isDefault) { //don't cache if date ranged, too many potential keys
     cached = myCache.getCache(sql,params);
   }
   if(cached) {
@@ -102,20 +102,29 @@ app.get('/statuscheck', async (req, res) => {
 });
 
 app.get('/numbers', async (req, res) => {
-  if(!req.query.typeId) {
+  const typeId = req.query.typeId;
+  if(!typeId) {
     res.status(400).send('Provide type ID!');
     return;
   }
-  const ret = await getNumbers(req.query.typeId,req.query.fromDate,req.query.toDate);
+  let fromDate = req.query.fromDate;
+  let toDate = req.query.toDate;
+  let isDefault = !fromDate && !toDate;
+  if(isDefault) { //if no dates provided, use the last rule update date
+    fromDate = LAST_RULE_UPDATE_DATE[typeId];
+  }
+  const ret = await getNumbers(typeId,fromDate,toDate,isDefault);
   res.json(ret);
 });
 
 app.get('/min_max_date', async (req, res) => {
-  if(!req.query.typeId) {
+  const typeId = req.query.typeId;
+  if(!typeId) {
     res.status(400).send('Provide type ID!');
     return;
   }
-  const ret = await getMixMaxDate(req.query.typeId);
+  let ret = await getMixMaxDate(typeId);
+  ret[0].last_rule_update = LAST_RULE_UPDATE_DATE[typeId];
   res.json(ret);
 });
 

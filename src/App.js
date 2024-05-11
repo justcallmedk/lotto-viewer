@@ -90,7 +90,7 @@ function App() {
           <React.Fragment>
             <input type="date" id="min" name="min"
                    onChange={ (e) => updateDateRange(e.target.value, 'min') }
-                   value={dateRange.min.split('T')[0]}
+                   value={dateRange.last_rule_update.split('T')[0]}
                    min={dateRange.min.split('T')[0]}
                    max={dateRange.max.split('T')[0]} />
             {' '} - {' '}
