@@ -6,18 +6,27 @@ a {
   color: inherit;
 }
 
+.dotted {
+  border-bottom: 1px dotted var(--white);
+}
+
+.accent {
+  color: var(--pink);
+  filter: drop-shadow(2px 2px 0px rgba(157, 23, 77));
+}
 .header {
   margin:20px 0;
   font-weight: 700;
   text-align: center;
   text-transform: uppercase;
-  font-size: x-large;
+  font-size: xx-large;
 }
 
 .sub1 {
-  margin:20px 0 10px 0;
+  padding:20px 0 10px 0;
   font-weight:700;
   text-transform: uppercase;
+  font-size: x-large;
 }
 
 .selector a.mm {
@@ -25,5 +34,10 @@ a {
 }
 
 .selector a.active {
-  background-color:yellow;
+  color: var(--pink);
+  filter: drop-shadow(2px 2px 0px rgba(157, 23, 77));
+}
+
+.date-range input{
+  padding:2px 4px;
 }

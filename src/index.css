@@ -1,6 +1,10 @@
 body {
+  --pink: rgb(244 114 182 / 1);
+  --white: rgb(229 231 235 / 1);
+  color : var(--white);
   margin: 0;
   font-family: "Courier Prime", monospace;
   font-weight: 400;
   font-style: normal;
+  background-color: rgb(20 21 26 / 1);
 }

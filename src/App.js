@@ -15,8 +15,10 @@ else {
 
 function App() {
   const [type, setType] = useState(1);
-  const [numbers, setNumbers] = useState(null);
+  const [data, setData] = useState(null);
   const [dateRange, setDateRange] = useState(null);
+
+  let drawCount;
 
   useEffect(() => {
     if(!dateRange) {
@@ -24,7 +26,7 @@ function App() {
       return;
     }
     if(!dateRange.minmax) { // date changed by onChange event
-      getNumbers(dateRange.min,dateRange.max);
+      getNumbers(dateRange.last_rule_update,dateRange.max);
     }
   },[dateRange]);
 
@@ -36,18 +38,30 @@ function App() {
   const getNumbers = (fromDate, toDate) => {
     fetch(window.BACKEND_HOST + 'numbers?typeId=' + type + (fromDate ? '&fromDate=' + fromDate : '') + (toDate ? '&toDate=' + toDate : ''))
       .then(async (response) => {
-        const numbers_ = await response.json();
+        const data_ = await response.json();
+        console.info(data_);
         let numbers = {
           numbers : [],
-          ball_numbers : []
+          ball_numbers : [],
         };
-        for(const row of numbers_) {
-          numbers[row.is_ball ? 'ball_numbers' : 'numbers'].push({
-            number : row.number,
-            count : row.count
-          });
+        let drawDates = [];
+        for(const row of data_) {
+          if(!row.count) {
+            drawDates.push(row.number);
+          }
+          else {
+            numbers[row.is_ball ? 'ball_numbers' : 'numbers'].push({
+              number: row.number,
+              count: row.count
+            });
+          }
         }
-        setNumbers(numbers);
+        setData({
+          numbers:numbers,
+          drawDates:drawDates,
+          drawDatesCount:drawDates.length,
+          type: type
+        });
       });
   };
 
@@ -69,10 +83,10 @@ function App() {
 
   return (
     <div className="App">
-      <header className="header">
-        lucky numbers
+      <header className="header accent">
+        Home is where the jackpot is.
       </header>
-      <div className="selector">
+      <div className="selector sub1 dotted">
         <a href="#"
            onClick={() => setType(PB_TYPE)}
            className={'pb ' + (type === PB_TYPE ? 'active' : '')}>
@@ -103,7 +117,7 @@ function App() {
         }
 
       </div>
-      <Table numbers={numbers}></Table>
+      <Table data={data}></Table>
     </div>
   );
 }

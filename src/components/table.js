@@ -2,7 +2,7 @@ import React, { useEffect, useState} from 'react';
 import './table.css';
 
 function Table(props) {
-  const [numbers,setNumbers] = useState(null);
+  const [data,setData] = useState(null);
   const [sortOrder, setSortOrder] = useState({
     numbers: {
       number: {
@@ -24,13 +24,12 @@ function Table(props) {
         active: 1
       }
     }
-
   });
 
   useEffect(() => { //get numbers when type changes
-    if(!props.numbers) return;
-    setNumbers(props.numbers);
-  },[props.numbers])
+    if(!props.data) return;
+    setData(props.data);
+  },[props.data])
 
   const renderArrow = (sortKey,type) => {
     const sortOrder_ = sortOrder[type][sortKey];
@@ -64,12 +63,12 @@ function Table(props) {
         </th>
       </tr>
       {
-        numbers &&
-        numbers[type].map((val, key) => {
+        data &&
+        data.numbers[type].map((val, key) => {
           return (
             <tr key={key}>
               <td>{val.number}</td>
-              <td>{val.count}</td>
+              <td>{val.count + ' (' + ((val.count / data.drawDatesCount)*100).toFixed(2) + '%)'}</td>
             </tr>
           )
         })
@@ -80,14 +79,14 @@ function Table(props) {
   }
 
   const sort = (sortKey, active, type) => {
-    let numbers_ = {...numbers};
-    numbers_[type].sort((a, b) => {
+    let data_ = {...data};
+    data_.numbers[type].sort((a, b) => {
       if (sortOrder[type][sortKey].order === 1) {
         return a[sortKey] - b[sortKey];
       }
       return b[sortKey] - a[sortKey];
     });
-    setNumbers(numbers_);
+    setData(data_);
     let sortOrder_ = {...sortOrder};
     sortOrder_[type][sortKey].active = 1;
     if (sortKey === 'number') {
@@ -101,9 +100,14 @@ function Table(props) {
 
   return (
     <div className="numbers">
-      <div className="sub1">Statistics</div>
-      { renderTable('numbers') }
-      { renderTable('ball_numbers') }
+      <div className="sub1 accent statistics-header">Statistics</div>
+      <div className="draw-dates-total">{data ? data.drawDatesCount : ''} drawings</div>
+      <div className={'table-container table-' + (data ? data.type : '')}>
+        { renderTable('numbers') }
+      </div>
+      <div className="table-container">
+        { renderTable('ball_numbers') }
+      </div>
     </div>
   );
 }

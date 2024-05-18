@@ -21,10 +21,11 @@ const LAST_RULE_UPDATE_DATE = {
   2 : '2017-10-28'
 };
 const SQL_GET_LAST_DRAW_DATE = 'SELECT draw_date FROM numbers WHERE type_id = ? ORDER BY draw_date DESC LIMIT 1';
-const SQL_GET_NUMBERS = 'SELECT number, CAST(is_ball as INT) as is_ball, COUNT(number) as count FROM numbers WHERE type_id = ?';
+const SQL_GET_NUMBERS = 'SELECT * FROM (SELECT number, CAST(is_ball as INT) as is_ball, COUNT(number) as count FROM numbers WHERE type_id = ?';
 const SQL_DRAW_DATE_FROM = ' AND draw_date >= ?';
 const SQL_DRAW_DATE_TO = ' AND draw_date <= ?';
-const SQL_ORDER_GROUP_BY_NUMBER = ' GROUP BY number, is_ball ORDER BY count';
+const SQL_ORDER_GROUP_BY_NUMBER = ' GROUP BY number, is_ball ORDER BY count) t ';
+const SQL_GET_DRAW_DATES = ' UNION SELECT DISTINCT(draw_date), NULL, NULL FROM numbers WHERE type_id = ?';
 const SQL_GET_MIN_MAX_DATE = 'SELECT MIN(draw_date) AS min, MAX(draw_date) AS max FROM numbers WHERE type_id = ?';
 
 //helpers
@@ -49,6 +50,7 @@ const execute = async(cached,sql,params) => {
   return data;
 };
 //end of helpers
+
 const getLastDrawDate = async (type) => {
   const connection = connectDB();
   const query = util.promisify(connection.query).bind(connection);
@@ -68,6 +70,7 @@ const getMixMaxDate = async (type) => {
   return await execute(cached,sql,params);
 };
 
+
 const getNumbers = async (type,fromDate,toDate,isDefault) => {
   let sql = SQL_GET_NUMBERS + SQL_DRAW_DATE_FROM;
   let params = [type,fromDate];
@@ -77,6 +80,14 @@ const getNumbers = async (type,fromDate,toDate,isDefault) => {
     sql += SQL_DRAW_DATE_TO;
   }
   sql += SQL_ORDER_GROUP_BY_NUMBER;
+  sql += SQL_GET_DRAW_DATES + SQL_DRAW_DATE_FROM;
+  params.push(type);
+  params.push(fromDate);
+  if(!isDefault) {
+    params.push(toDate);
+    sql += SQL_DRAW_DATE_TO;
+  }
+
   let cached = undefined;
   if(isDefault) { //don't cache if date ranged, too many potential keys
     cached = myCache.getCache(sql,params);

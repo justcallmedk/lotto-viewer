@@ -1,8 +1,7 @@
 .numbers table {
   border: 1px solid;
-  width: calc(50% - 10px);
+  width: 100%;
   border-collapse: collapse;
-  margin-right: 20px;
   float: left;
 }
 
@@ -10,7 +9,6 @@
   margin-right: 0px;
 }
 .numbers th {
-  color: #fff;
   background-color: #000;
   text-transform: uppercase;
   width: 50%;
@@ -18,7 +16,7 @@
 }
 
 .numbers th:first-child {
-  border-right: 1px solid #fff;
+  border-right: 1px solid var(--white);
 }
 
 .numbers th span:first-child{
@@ -30,7 +28,7 @@
   border-bottom: 1px dashed;
   border-right: 1px dashed;
   text-align: right;
-  padding-right: 10px;
+  padding: 2px 10px 2px 0;
 }
 
 .numbers td:last-child {
@@ -43,4 +41,38 @@
   cursor: pointer;
   position: relative;
   bottom: 1px;
+  color: var(--pink);
+}
+
+.statistics-header {
+  float:left;
+  width:50%;
+}
+
+.draw-dates-total {
+  float:right;
+  width:50%;
+  padding: 20px 0 10px 0;
+  text-align: right;
+  margin-top: 9px;
+}
+
+.table-container {
+  overflow-y: auto;
+  scrollbar-color: var(--pink) #000 ;
+  width: calc(50% - 10px);
+  margin-right:20px;
+  float:left;
+}
+
+.table-container:last-child {
+  margin-right: 0px;
+}
+
+.table-1 {
+  height:621.5px;
+}
+
+.table-2 {
+  height:598.5px;
 }
