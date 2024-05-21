@@ -18,8 +18,6 @@ function App() {
   const [data, setData] = useState(null);
   const [dateRange, setDateRange] = useState(null);
 
-  let drawCount;
-
   useEffect(() => {
     if(!dateRange) {
       updateMinMaxDateRange();
@@ -39,22 +37,26 @@ function App() {
     fetch(window.BACKEND_HOST + 'numbers?typeId=' + type + (fromDate ? '&fromDate=' + fromDate : '') + (toDate ? '&toDate=' + toDate : ''))
       .then(async (response) => {
         const data_ = await response.json();
-        console.info(data_);
         let numbers = {
           numbers : [],
           ball_numbers : [],
         };
-        let drawDates = [];
-        for(const row of data_) {
-          if(!row.count) {
-            drawDates.push(row.number);
-          }
-          else {
-            numbers[row.is_ball ? 'ball_numbers' : 'numbers'].push({
-              number: row.number,
-              count: row.count
-            });
-          }
+
+        const lastDrawnMap = new Map();
+        data_['SQL_GET_NUMBER_LAST_DRAWN'].map((obj) => {
+          lastDrawnMap.set(obj.number + '_' + obj.is_ball,obj.last_drawn);
+        });
+        const drawDates = data_['SQL_GET_DRAW_DATES'];
+        for(const row of data_['SQL_GET_NUMBERS']) {
+          const lastDrawn = lastDrawnMap.get(row.number + '_' + (row.is_ball ? '1' : '0')).split('T')[0];
+          numbers[row.is_ball ? 'ball_numbers' : 'numbers'].push({
+            number: { string : row.number, numeric : row.number },
+            count: { string : row.count, numeric : row.count },
+            last_drawn : {
+              string : lastDrawn,
+              numeric : lastDrawn.split('-').join('')
+            }
+          });
         }
         setData({
           numbers:numbers,

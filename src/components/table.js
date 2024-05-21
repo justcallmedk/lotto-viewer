@@ -3,11 +3,15 @@ import './table.css';
 
 function Table(props) {
   const [data,setData] = useState(null);
-  const [sortOrder, setSortOrder] = useState({
+  const [sortOrder] = useState({
     numbers: {
       number: {
         order: 1, //asc
         active: -1
+      },
+      last_drawn: {
+        order : 1,
+        active : -1
       },
       count: {
         order: -1, //desc
@@ -18,6 +22,10 @@ function Table(props) {
       number: {
         order: 1, //asc
         active: -1
+      },
+      last_drawn: {
+        order : 1,
+        active : -1
       },
       count: {
         order: -1, //desc
@@ -44,21 +52,30 @@ function Table(props) {
       <tbody>
       <tr>
         <th>
-            <span>
-              { type === 'numbers' ? 'numbers' : 'gold ball'}
-            </span>
+          <span>
+            { type === 'numbers' ? 'numbers' : 'gold ball'}
+          </span>
           <span className="up-down-arrow up"
                 onClick={() => sort('number', 0, type)}>
             {renderArrow('number',type)}
           </span>
         </th>
         <th>
-            <span>
-              Count
-            </span>
+          <span>
+            last drawn
+          </span>
+          <span className="up-down-arrow down active"
+                onClick={() => sort('last_drawn', 1, type)}>
+            {renderArrow('last_drawn', type)}
+          </span>
+        </th>
+        <th>
+          <span>
+            Count
+          </span>
           <span className="up-down-arrow down active"
                 onClick={() => sort('count', 1, type)}>
-            {renderArrow('count',type)}
+            {renderArrow('count', type)}
           </span>
         </th>
       </tr>
@@ -67,8 +84,9 @@ function Table(props) {
         data.numbers[type].map((val, key) => {
           return (
             <tr key={key}>
-              <td>{val.number}</td>
-              <td>{val.count + ' (' + ((val.count / data.drawDatesCount)*100).toFixed(2) + '%)'}</td>
+              <td>{val.number.string}</td>
+              <td>{val.last_drawn.string}</td>
+              <td>{val.count.string + ' (' + ((val.count.string / data.drawDatesCount)*100).toFixed(2) + '%)'}</td>
             </tr>
           )
         })
@@ -81,21 +99,20 @@ function Table(props) {
   const sort = (sortKey, active, type) => {
     let data_ = {...data};
     data_.numbers[type].sort((a, b) => {
-      if (sortOrder[type][sortKey].order === 1) {
-        return a[sortKey] - b[sortKey];
-      }
-      return b[sortKey] - a[sortKey];
+      if (sortOrder[type][sortKey].order === 1)
+        return a[sortKey].numeric - b[sortKey].numeric;
+      return b[sortKey].numeric - a[sortKey].numeric;
     });
     setData(data_);
     let sortOrder_ = {...sortOrder};
     sortOrder_[type][sortKey].active = 1;
-    if (sortKey === 'number') {
-      sortOrder_[type]['count'].active = 0;
-    } else {
-      sortOrder_[type]['number'].active = 0;
+
+    for(const key in sortOrder_[type]) {
+      if(key !== sortKey)
+        sortOrder_[type][key].active = 0;
     }
     sortOrder_[type][sortKey].order = sortOrder_[type][sortKey].order * -1;
-    setSortOrder(sortOrder_);
+    //setSortOrder(sortOrder_);
   };
 
   return (

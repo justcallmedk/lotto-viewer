@@ -10,8 +10,10 @@ const port = 6010;
 const mysql = require('mysql');
 const util = require('util');
 
+const debug = process.argv[5] === '--debug';
 const Cache = require('./cache');
-const myCache = new Cache();
+const myCache = new Cache(debug);
+
 
 const PB_TYPE = 1;
 const MM_TYPE = 2;
@@ -20,13 +22,18 @@ const LAST_RULE_UPDATE_DATE = {
   1 : '2015-10-04',
   2 : '2017-10-28'
 };
+
+//sql
 const SQL_GET_LAST_DRAW_DATE = 'SELECT draw_date FROM numbers WHERE type_id = ? ORDER BY draw_date DESC LIMIT 1';
-const SQL_GET_NUMBERS = 'SELECT * FROM (SELECT number, CAST(is_ball as INT) as is_ball, COUNT(number) as count FROM numbers WHERE type_id = ?';
+const SQL_GET_NUMBERS = 'SELECT number, CAST(is_ball as INT) as is_ball, COUNT(number) as count FROM numbers WHERE type_id = ?';
 const SQL_DRAW_DATE_FROM = ' AND draw_date >= ?';
 const SQL_DRAW_DATE_TO = ' AND draw_date <= ?';
-const SQL_ORDER_GROUP_BY_NUMBER = ' GROUP BY number, is_ball ORDER BY count) t ';
-const SQL_GET_DRAW_DATES = ' UNION SELECT DISTINCT(draw_date), NULL, NULL FROM numbers WHERE type_id = ?';
+const SQL_GROUP_BY_NUMBER = ' GROUP BY number, is_ball';
+const SQL_ORDER_BY_COUNT = ' ORDER BY count';
+const SQL_GET_DRAW_DATES = 'SELECT DISTINCT(draw_date), NULL, NULL FROM numbers WHERE type_id = ?';
 const SQL_GET_MIN_MAX_DATE = 'SELECT MIN(draw_date) AS min, MAX(draw_date) AS max FROM numbers WHERE type_id = ?';
+const SQL_GET_NUMBER_LAST_DRAWN = 'SELECT number, CAST(is_ball as INT) as is_ball, MAX(draw_date) as last_drawn FROM numbers WHERE type_id = ?';
+const SQL_ORDER_BY_DATE = ' ORDER BY last_drawn';
 
 //helpers
 const connectDB = () => {
@@ -70,36 +77,44 @@ const getMixMaxDate = async (type) => {
   return await execute(cached,sql,params);
 };
 
-
 const getNumbers = async (type,fromDate,toDate,isDefault) => {
-  let sql = SQL_GET_NUMBERS + SQL_DRAW_DATE_FROM;
-  let params = [type,fromDate];
-
-  if(!isDefault) {
-    params.push(toDate);
-    sql += SQL_DRAW_DATE_TO;
+  const sqls = {
+    SQL_GET_NUMBERS : {
+      sql : SQL_GET_NUMBERS,
+      group_by : SQL_GROUP_BY_NUMBER,
+      order_by : SQL_ORDER_BY_COUNT
+    },
+    SQL_GET_DRAW_DATES : {
+      sql : SQL_GET_DRAW_DATES,
+    },
+    SQL_GET_NUMBER_LAST_DRAWN : {
+      sql : SQL_GET_NUMBER_LAST_DRAWN,
+      group_by : SQL_GROUP_BY_NUMBER,
+      order_by : SQL_ORDER_BY_DATE
+    }
   }
-  sql += SQL_ORDER_GROUP_BY_NUMBER;
-  sql += SQL_GET_DRAW_DATES + SQL_DRAW_DATE_FROM;
-  params.push(type);
-  params.push(fromDate);
-  if(!isDefault) {
-    params.push(toDate);
-    sql += SQL_DRAW_DATE_TO;
+  let ret = {};
+  for(key in sqls) {
+    let ret_ = {};
+    let sql = sqls[key].sql + SQL_DRAW_DATE_FROM;
+    let params = [type,fromDate];
+    if(!isDefault) {
+      params.push(toDate);
+      sql += SQL_DRAW_DATE_TO;
+    }
+    sql += sqls[key].group_by ? sqls[key].group_by : '';
+    sql += sqls[key].order_by ? sqls[key].order_by : '';
+    let cached = undefined;
+    if(isDefault) { //don't cache if date ranged, too many potential keys
+      cached = myCache.getCache(sql,params);
+    }
+    ret_ = cached ? cached : await execute(cached,sql,params);
+    ret[key] = ret_;
   }
-
-  let cached = undefined;
-  if(isDefault) { //don't cache if date ranged, too many potential keys
-    cached = myCache.getCache(sql,params);
-  }
-  if(cached) {
-    return cached;
-  }
-
-  return await execute(cached,sql,params);
+  return ret;
 };
 
-const corsOptions = { //localhost developement only
+const corsOptions = { //localhost dev env only
   origin: 'http://localhost:3000'
 }
 app.use(cors(corsOptions));
