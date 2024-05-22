@@ -9,14 +9,18 @@
   margin-right: 0px;
 }
 .numbers th {
-  background-color: #000;
+  background-color: var(--black);
+  color: var(--white);
   text-transform: uppercase;
   width: 33.33%;
   font-weight: normal;
 }
 
-.numbers th:first-child {
+.numbers th {
   border-right: 1px solid var(--white);
+}
+.numbers th:last-child {
+  border-right: none;
 }
 
 .numbers th span:first-child{
@@ -59,7 +63,7 @@
 
 .table-container {
   overflow-y: auto;
-  scrollbar-color: var(--pink) #000 ;
+  scrollbar-color: var(--pink)  var(--black) ;
   width: calc(50% - 10px);
   margin-right:20px;
   float:left;
@@ -75,4 +79,40 @@
 
 .table-2 {
   height:598.5px;
+}
+
+.numbers tr:nth-child(even) {
+  background-color: #fff;
+}
+
+.numbers tr:nth-child(odd) {
+  background-color: var(--white);
+}
+
+.numbers th:first-child,
+.numbers td:first-child {
+  width:20%;
+}
+
+.numbers th:last-child,
+.numbers td:last-child {
+  width:20%;
+}
+
+@media only screen and (max-width: 500px) {
+  .table-container {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  .numbers th:first-child,
+  .numbers td:first-child {
+    width:25%;
+  }
+  .numbers th:last-child,
+  .numbers td:last-child {
+    width:25%;
+  }
+  .numbers th {
+    font-size: medium;
+  }
 }

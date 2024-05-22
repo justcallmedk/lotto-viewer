@@ -7,13 +7,14 @@ a {
 }
 
 .dotted {
-  border-bottom: 1px dotted var(--white);
+  border-bottom: 1px dotted var(--black);
 }
 
 .accent {
   color: var(--pink);
   filter: drop-shadow(2px 2px 0px rgba(157, 23, 77));
 }
+
 .header {
   margin:20px 0;
   font-weight: 700;
@@ -40,4 +41,13 @@ a {
 
 .date-range input{
   padding:2px 4px;
+}
+
+@media only screen and (max-width: 500px) {
+  .header {
+    //font-size: x-large
+  }
+  .sub1 {
+    //font-size: large;
+  }
 }
