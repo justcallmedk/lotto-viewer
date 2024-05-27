@@ -49,49 +49,50 @@ function Table(props) {
 
   const renderTable = (type) => {
     return <table>
+      <thead>
+        <tr>
+          <th>
+            <span>
+              { type === 'numbers' ? 'numbers' : 'gold ball'}
+            </span>
+            <span className="up-down-arrow up"
+                  onClick={() => sort('number', 0, type)}>
+              {renderArrow('number',type)}
+            </span>
+          </th>
+          <th>
+            <span>
+              last drawn
+            </span>
+            <span className="up-down-arrow down active"
+                  onClick={() => sort('last_drawn', 1, type)}>
+              {renderArrow('last_drawn', type)}
+            </span>
+          </th>
+          <th>
+            <span>
+              Count
+            </span>
+            <span className="up-down-arrow down active"
+                  onClick={() => sort('count', 1, type)}>
+              {renderArrow('count', type)}
+            </span>
+          </th>
+        </tr>
+      </thead>
       <tbody>
-      <tr>
-        <th>
-          <span>
-            { type === 'numbers' ? 'numbers' : 'gold ball'}
-          </span>
-          <span className="up-down-arrow up"
-                onClick={() => sort('number', 0, type)}>
-            {renderArrow('number',type)}
-          </span>
-        </th>
-        <th>
-          <span>
-            last drawn
-          </span>
-          <span className="up-down-arrow down active"
-                onClick={() => sort('last_drawn', 1, type)}>
-            {renderArrow('last_drawn', type)}
-          </span>
-        </th>
-        <th>
-          <span>
-            Count
-          </span>
-          <span className="up-down-arrow down active"
-                onClick={() => sort('count', 1, type)}>
-            {renderArrow('count', type)}
-          </span>
-        </th>
-      </tr>
-      {
-        data &&
-        data.numbers[type].map((val, key) => {
-          return (
-            <tr key={key}>
-              <td>{val.number.string}</td>
-              <td>{val.last_drawn.string}</td>
-              <td>{val.count.string + ' (' + ((val.count.string / data.drawDatesCount)*100).toFixed(2) + '%)'}</td>
-            </tr>
-          )
-        })
-
-      }
+        {
+          data &&
+          data.numbers[type].map((val, key) => {
+            return (
+              <tr key={key}>
+                <td>{val.number.string}</td>
+                <td>{val.last_drawn.string}</td>
+                <td>{val.count.string + ' (' + ((val.count.string / data.drawDatesCount)*100).toFixed(2) + '%)'}</td>
+              </tr>
+            )
+          })
+        }
       </tbody>
     </table>
   }

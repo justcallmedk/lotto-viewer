@@ -1,0 +1,9 @@
+.balls {
+  width:20px;
+  display:inline-block;
+  text-align: center;
+  margin:0 10px;
+}
+.gold-ball {
+  color: var(--pink);
+}

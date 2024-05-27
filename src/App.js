@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
 import Table from './components/table';
+import AutoPick from './components/auto-pick';
 
 const PB_TYPE = 1;
 const MM_TYPE = 2;
@@ -117,8 +118,8 @@ function App() {
                    max={dateRange.max.split('T')[0]} />
           </React.Fragment>
         }
-
       </div>
+      <AutoPick data={data ? data.numbers : null}></AutoPick>
       <Table data={data}></Table>
     </div>
   );
