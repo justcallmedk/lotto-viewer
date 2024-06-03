@@ -5,7 +5,7 @@
 - React
 - Express
 
-## Getting Startsed
+## Getting Started
 ```bash
 $ npm install
 $ node express/app.js {db_host} {db_username} {db_password} &
