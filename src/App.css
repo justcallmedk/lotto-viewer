@@ -39,8 +39,30 @@ a {
   filter: drop-shadow(2px 2px 0px rgba(157, 23, 77));
 }
 
+.date-range {
+  padding: 20px 0 10px 0;
+}
+
 .date-range input{
   padding:2px 4px;
+}
+
+.date-range .last-date{
+  margin-left: 10px;
+}
+
+.date-range .last-date a{
+  margin-left: 10px;
+}
+
+.date-range .last-date a.active{
+  color: var(--pink);
+}
+
+.date-range .last-date .download {
+  cursor: pointer;
+  float: right;
+  font-size:large;
 }
 
 table {
@@ -91,7 +113,14 @@ table tr:nth-child(odd) {
     width: 100%;
     margin-bottom: 10px;
   }
+
   table th {
     font-size: medium;
+  }
+
+  .date-range .last-date{
+    margin-left: 0;
+    display: block;
+    margin-top: 5px;
   }
 }

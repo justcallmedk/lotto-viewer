@@ -13,11 +13,6 @@ function AutoPick(props) {
     });
   },[props.data])
 
-  useEffect(() => { //get numbers when type changes
-    if(!numbers) return;
-    console.info(numbers);
-  },[numbers])
-
   const generateAutoPick = (numbers,ballNumbers,reverse) => {
     if(reverse) {
       numbers.reverse();

@@ -3,6 +3,7 @@ module.exports = class Cache {
     this.cache = {};
     this.cacheDate = undefined;
     this.debug = debug;
+    this.MAX_CACHE_SIZE = 50;
   }
 
   getToday() {
@@ -25,6 +26,9 @@ module.exports = class Cache {
   }
 
   updateCache (sql,params,data) {
+    if(Object.keys(this.cache).length > this.MAX_CACHE_SIZE) { //flush
+      this.cache = {};
+    }
     const cacheKey = this.getCacheKey(sql,params);
     this.cacheDate = this.getToday();
     if(this.debug)

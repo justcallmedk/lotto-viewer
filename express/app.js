@@ -34,6 +34,9 @@ const SQL_GET_DRAW_DATES = 'SELECT DISTINCT(draw_date), NULL, NULL FROM numbers 
 const SQL_GET_MIN_MAX_DATE = 'SELECT MIN(draw_date) AS min, MAX(draw_date) AS max FROM numbers WHERE type_id = ?';
 const SQL_GET_NUMBER_LAST_DRAWN = 'SELECT number, CAST(is_ball as INT) as is_ball, MAX(draw_date) as last_drawn FROM numbers WHERE type_id = ?';
 const SQL_ORDER_BY_DATE = ' ORDER BY last_drawn';
+const SQL_GET_NUMBER = 'SELECT draw_date, CAST(is_ball as INT) as is_ball FROM numbers WHERE type_id = ? AND number = ? AND is_ball = ?';
+const SQL_ORDER_BY_DRAW_DATE = ' ORDER BY draw_date';
+const SQL_GET_ALL_NUMBERS = 'SELECT number, draw_date FROM numbers WHERE type_id = ? ';
 
 //helpers
 const connectDB = () => {
@@ -54,7 +57,33 @@ const execute = async(cached,sql,params) => {
   if(cached === false) { //different from undefined (don't cache flag)
     myCache.updateCache(sql,params,data);
   }
+  connection.end(function(err) {
+    if(err) {
+      console.log(err.message);
+    }
+  });
   return data;
+};
+
+const toCSV = (rows) => {
+  if(rows.length === 0) {
+    return [];
+  }
+
+  let lastDate = rows[0].draw_date.toISOString().split('T')[0];
+
+  let csvStr = 'number#1,number#2,number#3,number#4,number#5,gold ball,draw_date\n';
+  let date;
+  for(const row of rows) {
+    date =  row.draw_date.toISOString().split('T')[0];
+    if(lastDate !== date) {
+      csvStr += date + '\n';
+      lastDate = date;
+    }
+    csvStr+= row.number + ',';
+  }
+  csvStr+= date + '\n';
+  return csvStr
 };
 //end of helpers
 
@@ -75,6 +104,36 @@ const getMixMaxDate = async (type) => {
   }
 
   return await execute(cached,sql,params);
+};
+
+const getAllNumbers = async (type,fromDate,toDate,isDefault) => {
+  let sql = SQL_GET_ALL_NUMBERS + SQL_DRAW_DATE_FROM;
+  let params = [type,fromDate];
+  if(!isDefault) {
+    params.push(toDate);
+    sql += SQL_DRAW_DATE_TO;
+  }
+  sql += SQL_ORDER_BY_DRAW_DATE  + ', is_ball';
+  let cached;
+  if(isDefault) {
+    cached = myCache.getCache(sql,params);
+  }
+  return cached ? cached : await execute(cached,sql,params);
+}
+
+const getNumber = async (type,fromDate,toDate,number,isBall,isDefault) => {
+  let sql = SQL_GET_NUMBER + SQL_DRAW_DATE_FROM;
+  let params = [type,number,isBall,fromDate];
+  if(!isDefault) {
+    params.push(toDate);
+    sql += SQL_DRAW_DATE_TO;
+  }
+  sql += SQL_ORDER_BY_DRAW_DATE;
+  let cached;
+  if(isDefault) {
+    cached = myCache.getCache(sql,params);
+  }
+  return cached ? cached : await execute(cached,sql,params);
 };
 
 const getNumbers = async (type,fromDate,toDate,isDefault) => {
@@ -104,7 +163,7 @@ const getNumbers = async (type,fromDate,toDate,isDefault) => {
     }
     sql += sqls[key].group_by ? sqls[key].group_by : '';
     sql += sqls[key].order_by ? sqls[key].order_by : '';
-    let cached = undefined;
+    let cached;
     if(isDefault) { //don't cache if date ranged, too many potential keys
       cached = myCache.getCache(sql,params);
     }
@@ -119,6 +178,7 @@ const corsOptions = { //localhost dev env only
 }
 app.use(cors(corsOptions));
 
+//routes
 app.get('/statuscheck', async (req, res) => {
   res.json({
     cacheDate : myCache.cacheDate ? myCache.cacheDate : 'N/A',
@@ -127,20 +187,41 @@ app.get('/statuscheck', async (req, res) => {
   });
 });
 
-app.get('/numbers', async (req, res) => {
+app.get(['/numbers','/number/','/download'], async (req, res) => {
+  const reqPath = req.path;
   const typeId = req.query.typeId;
+  const isBall = req.query.isBall;
+  const number = req.query.number;
+
   if(!typeId) {
     res.status(400).send('Provide type ID!');
     return;
   }
+  if(reqPath === '/number' && (!isBall || !number)) {
+    res.status(400).send('Insufficient parameters!');
+    return;
+  }
+
   let fromDate = req.query.fromDate;
   let toDate = req.query.toDate;
   let isDefault = !fromDate && !toDate;
   if(isDefault) { //if no dates provided, use the last rule update date
     fromDate = LAST_RULE_UPDATE_DATE[typeId];
   }
-  const ret = await getNumbers(typeId,fromDate,toDate,isDefault);
-  res.json(ret);
+
+  if(reqPath === '/numbers') {
+    res.json(await getNumbers(typeId,fromDate,toDate,isDefault));
+  }
+  else if(reqPath === '/number') {
+    res.json(await getNumber(typeId,fromDate,toDate,number,isBall,isDefault));
+  }
+  else {
+    const file = toCSV(await getAllNumbers(typeId,fromDate,toDate,isDefault));
+    const fileName = (PB_TYPE === typeId ? 'PB' : 'MM') + '_' + fromDate + '_' + toDate + '.csv';
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=' + fileName);
+    res.send(file);
+  }
 });
 
 app.get('/min_max_date', async (req, res) => {
