@@ -3,6 +3,9 @@ import { LineChart } from '@mui/x-charts/LineChart';
 import './chart.css';
 
 const BALLS_KEY = 'balls';
+const NUMBERS_KEY = 'numbers';
+const INTERVAL_YEAR = 'yearly';
+const INTERVAL_MONTHLY = 'monthly';
 
 //TODO mobile view?
 function Chart(props) {
@@ -63,12 +66,12 @@ function Chart(props) {
     const dateParam =
       (dateRange && dateRange.min ? '&fromDate=' + dateRange.min : '') +
       (dateRange && dateRange.max ? '&toDate=' + dateRange.max : '');
-    let interval = 'yearly';
+    let interval = INTERVAL_YEAR;
     if(dateRange) {
       const startYear = parseInt(dateRange.min.split('-')[0]);
       const endYear = parseInt(dateRange.max.split('-')[0]);
       if(endYear - startYear <= 1) {
-        interval = 'monthly';
+        interval = INTERVAL_MONTHLY;
       }
     }
 
@@ -81,7 +84,7 @@ function Chart(props) {
         let yData = [];
         for(const row of data) {
           let interval_;
-          if(interval === 'yearly') {
+          if(interval === INTERVAL_YEAR) {
             interval_ = row.draw_date.split('T')[0].split('-')[0]
           } else {
             const dateSplit = row.draw_date.split('T')[0];
@@ -140,7 +143,7 @@ function Chart(props) {
       <div className={'chart-balls-container'}>
         <div>
           {numbersRange &&
-            renderNumbersRange('numbers')
+            renderNumbersRange(NUMBERS_KEY)
           }
         </div>
         <div>
