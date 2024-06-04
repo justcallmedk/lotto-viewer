@@ -33,7 +33,8 @@ function App() {
   },[dateRange]);
 
   useEffect(() => { //get numbers when type changes
-    updateMinMaxDateRange();
+    if(dateRange)
+      updateMinMaxDateRange();
     getNumbers();
   },[type]);
 

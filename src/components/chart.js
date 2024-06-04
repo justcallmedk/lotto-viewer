@@ -12,7 +12,7 @@ function Chart(props) {
   const [numbersRange,setNumbersRange] = useState(null);
   const [chartData, setChartData] = useState({x:[],y:{}});
   const [dateRange, setDateRange] = useState(null);
-  const [type, setType] = useState(0);
+  const [type, setType] = useState(1);
 
   useEffect(() => {
     if(!props.data) return;
