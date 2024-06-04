@@ -217,7 +217,7 @@ app.get(['/numbers','/number/','/download'], async (req, res) => {
   }
   else {
     const file = toCSV(await getAllNumbers(typeId,fromDate,toDate,isDefault));
-    const fileName = (PB_TYPE === typeId ? 'PB' : 'MM') + '_' + fromDate + '_' + toDate + '.csv';
+    const fileName = (PB_TYPE === typeId ? 'PB' : 'MM') + '_' + fromDate + '_' + (toDate ? toDate : '') + '.csv';
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename=' + fileName);
     res.send(file);
