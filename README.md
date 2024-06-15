@@ -1,9 +1,14 @@
-# lotto-viewer
+# Lottery Numbers Analyzer
+
+## Demo
+https://lotto.sooda.io
 
 ## Dependencies
 - Node.js
 - React
 - Express
+- MySQL
+   - Data Generator (https://github.com/justcallmedk/lotto-generator)
 
 ## Getting Started
 ```bash
